@@ -202,12 +202,17 @@ impl VerifyClient for Client {
             .get("api/tags")
             .expect("Failed to build request")
             .send()
-            .await?;
+            .await
+            .map_err(|err| {
+                VerifyError::HttpError(rig::http_client::Error::Instance(
+                    format!("HTTP provider error: {err}").into(),
+                ))
+            })?;
+
         match response.status() {
             reqwest::StatusCode::OK => Ok(()),
-            _ => {
-                response.error_for_status()?;
-                Ok(())
+            err => {
+                Err(VerifyError::HttpError(rig::http_client::Error::Instance(format!("HTTP provider returned error with status code {err} when trying to verify client").into())))
             }
         }
     }
@@ -323,7 +328,10 @@ impl embeddings::EmbeddingModel for EmbeddingModel {
                 .map(|(vec, document)| embeddings::Embedding { document, vec })
                 .collect())
         } else {
-            Err(EmbeddingError::ProviderError(response.text().await?))
+            let err = response.text().await.map_err(|x| {
+                EmbeddingError::HttpError(rig::http_client::Error::Instance(x.into()))
+            })?;
+            Err(EmbeddingError::ProviderError(err))
         }
     }
 }
@@ -592,7 +600,7 @@ impl completion::CompletionModel for CompletionModel {
                 let chunk = match chunk_result {
                     Ok(c) => c,
                     Err(e) => {
-                        yield Err(CompletionError::from(e));
+                        yield Err(CompletionError::RequestError(e.into()));
                         break;
                     }
                 };
@@ -789,10 +797,10 @@ impl ConvertMessage for Message {
                                 crate::message::UserContent::Image(crate::message::Image {
                                     data,
                                     ..
-                                }) => images.push(data),
+                                }) => images.push(data.to_string()),
                                 crate::message::UserContent::Document(
                                     crate::message::Document { data, .. },
-                                ) => texts.push(data),
+                                ) => texts.push(data.to_string()),
                                 _ => {} // Audio not supported by Ollama
                             }
                             (texts, images)

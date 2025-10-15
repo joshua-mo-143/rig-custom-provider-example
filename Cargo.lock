@@ -1021,8 +1021,9 @@ dependencies = [
 
 [[package]]
 name = "rig-core"
-version = "0.18.2"
-source = "git+https://github.com/0xPlaygrounds/rig.git?branch=main#683f5204354cd169d80f9f11754a50ede6f40c45"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "136b8115983df35be2c9b176c50c8a793886411e7b5ee8767b8c9cfd25e0ea90"
 dependencies = [
  "as-any",
  "async-stream",
@@ -1030,6 +1031,7 @@ dependencies = [
  "bytes",
  "futures",
  "glob",
+ "http",
  "mime_guess",
  "ordered-float",
  "reqwest",
@@ -1040,6 +1042,7 @@ dependencies = [
  "thiserror 2.0.16",
  "tokio",
  "tracing",
+ "tracing-futures",
  "url",
  "worker",
 ]
@@ -1552,6 +1555,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9d12581f227e93f094d3af2ae690a574abb8a2b9b7a96e7cfe9647b2b617678"
 dependencies = [
  "once_cell",
+]
+
+[[package]]
+name = "tracing-futures"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "97d095ae15e245a057c8e8451bab9b3ee1e1f68e9ba2b4fbc18d0ac5237835f2"
+dependencies = [
+ "futures",
+ "futures-task",
+ "pin-project",
+ "tracing",
 ]
 
 [[package]]
